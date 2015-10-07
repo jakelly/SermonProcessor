@@ -1,0 +1,33 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SoundTouch.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="BaseDirectory" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\Users\jkelly\Documents\Church\Radio Ministry\Original\Exported WAV</Value>
+    </Setting>
+    <Setting Name="TrimmedDirectory" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">.\Step 2 - Trimmed\</Value>
+    </Setting>
+    <Setting Name="IntroOutroDirectory" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">.\Step 3 - IntroOutroAdded\</Value>
+    </Setting>
+    <Setting Name="IntroFile" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">.\Media\NewIntro.wav</Value>
+    </Setting>
+    <Setting Name="OutroFile" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">.\Media\NewOutro.wav</Value>
+    </Setting>
+    <Setting Name="SpeechCleanedDirectory" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">.\Step 1 - Speech Cleaned\</Value>
+    </Setting>
+    <Setting Name="SoxEffectBatchFile" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">.\Media\soxeffects.bat</Value>
+    </Setting>
+    <Setting Name="SermonStartTime" Type="System.Single" Scope="Application">
+      <Value Profile="(Default)">22</Value>
+    </Setting>
+    <Setting Name="OutroStartTime" Type="System.Single" Scope="Application">
+      <Value Profile="(Default)">38</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

@@ -8,8 +8,8 @@
     <ProjectGuid>{667E022F-956C-4849-802D-30DC58537040}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SoundTouch</RootNamespace>
-    <AssemblyName>SoundTouch</AssemblyName>
+    <RootNamespace>SermonProcessor</RootNamespace>
+    <AssemblyName>SermonProcessor</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -81,6 +81,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
     <None Include="Properties\Settings.settings">

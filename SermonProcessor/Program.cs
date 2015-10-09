@@ -3,39 +3,60 @@ using System.IO;
 using NAudio.Wave;
 using SoundTouchNet;
 using System.Diagnostics;
-using SoundTouch.Properties;
+using SermonProcessor.Properties;
 
 namespace SoundTouchExample
 {
     static class Program
     {
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
-            //Location of Wav Files that are approximately 29 minutes in length
-            /*
-            Directory.SetCurrentDirectory(Settings.Default.BaseDirectory);
-                       
-            if (!Directory.Exists(Settings.Default.TrimmedDirectory))
-                Directory.CreateDirectory(Settings.Default.TrimmedDirectory);
+            ParseArguments(args);
 
-            if (!Directory.Exists(Settings.Default.SpeechCleanedDirectory)) 
-                Directory.CreateDirectory(Settings.Default.SpeechCleanedDirectory);
-
-            if (!Directory.Exists(Settings.Default.IntroOutroDirectory))
-                Directory.CreateDirectory(Settings.Default.IntroOutroDirectory);
-            */
-
-            Directory.SetCurrentDirectory(Settings.Default.BaseDirectory);
+            //Directory.SetCurrentDirectory(Settings.Default.BaseDirectory);
             
-            foreach (string File in Directory.GetFiles(".", "*.wav"))
+            //foreach (string File in Directory.GetFiles(".", "*.wav"))
+            //{
+            //    string OutFile = SoxEffects(File);
+            //    TrimAudioLength(OutFile);
+            //    //AddIntroOutro(TrimAudioLength(OutFile));
+            //}
+            //Console.WriteLine("Finished Processing Files");
+            //Console.ReadLine();
+        }
+
+        private static void ParseArguments(string[] args)
+        {
+            /*
+             *  SermonProcessor <command> <input file> <output file>    
+             *      <command>       Function to perform to tranform input file to output file
+             *                      
+             *                      CleanSpeech     Cleans the audio speech using sox.
+             *                      
+             *                      TrimLength      Trims the audio to a given length in minutes.
+             *                      
+             *                      AddIntroOutro   Adds intro and outro clips to input file
+             *                      
+             *      <input file>    File being tranformed
+             *      <output file>   File being produced after tranformation.  This can be a path instead.
+             */
+            switch (args[0].ToLower())
             {
-                string OutFile = SoxEffects(File);
-                TrimAudioLength(OutFile);
-                //AddIntroOutro(TrimAudioLength(OutFile));
+                case "cleanspeech":
+                    break;
+                case "trimlength":
+                    break;
+                case "addintrooutro":
+                    AddIntroOutro(args[1], args[2], args[3], 
+                        double.Parse(args[4]), 
+                        double.Parse(args[5]), 
+                        args[6]);
+                    break;
+                default:
+                    Console.WriteLine("Invalid Arguments...");
+                    break;
             }
-            Console.WriteLine("Finished Processing Files");
-            Console.ReadLine();
         }
 
         private static string TrimAudioLength(string File)
@@ -45,20 +66,12 @@ namespace SoundTouchExample
             WaveFileReader reader = new WaveFileReader(File);
             //Calculate Tempo
             float PercentChange = CalculateTempo(reader.TotalTime, TargetDuration);
-            Console.ResetColor();
-            if (Math.Abs(PercentChange) > 2)
-                Console.ForegroundColor = ConsoleColor.Green; //Greater than 2% delta
-            if (Math.Abs(PercentChange) > 3)
-                Console.ForegroundColor = ConsoleColor.Yellow; //Greater than 3% delta
-            if (Math.Abs(PercentChange) > 4)
-                Console.ForegroundColor = ConsoleColor.Red; //Greater than 4% delta
-
+            
             string FileOut = File.Replace(Settings.Default.SpeechCleanedDirectory, Settings.Default.TrimmedDirectory);
             processWave(File, FileOut, 1 + PercentChange * 0.01f, 1.0f, 1.0f);
             
             //AddIntroOutro(FileOut);
 
-            Console.WriteLine("{2}%\t{1}\t{0}", File.Replace(@".\Joel Chapman", ""), reader.TotalTime, PercentChange.ToString("N3"));
             reader.Close();
             
             return FileOut;
@@ -83,32 +96,41 @@ namespace SoundTouchExample
             return FileOut;
         }
 
-
-        private static void AddIntroOutro(string OriginalAudioFileName)
+        private static void AddIntroOutro(string SermonFileName = "",
+            string IntroFileName = "",
+            string OutroFileName = "",
+            double StartSermonTime = 0,
+            double StartOutroTime = 0,
+            string ResultingFile = "")
         {
-            WaveFileReader intro = new WaveFileReader(Settings.Default.IntroFile);
-            WaveFileReader outro = new WaveFileReader(Settings.Default.OutroFile);
-            //WaveFileReader intro = new WaveFileReader(@"C:\Users\jkelly\Documents\Church\Radio Ministry\Original\Exported WAV\Test\Media\Intro.wav");
-            //WaveFileReader outro = new WaveFileReader(@"C:\Users\jkelly\Documents\Church\Radio Ministry\Original\Exported WAV\Test\Media\Outro.wav");
+            if (String.IsNullOrWhiteSpace(SermonFileName)) throw new ArgumentException("SermonFileName must reference a valid file.");
 
-            WaveFileReader audio = new WaveFileReader(OriginalAudioFileName);
+            if (String.IsNullOrWhiteSpace(IntroFileName)) throw new ArgumentException("IntroFileName must reference a valid file.");
+
+            if (String.IsNullOrWhiteSpace(OutroFileName)) throw new ArgumentException("OutroFileName must reference a valid file.");
+
+            if (String.IsNullOrWhiteSpace(ResultingFile)) ResultingFile = Settings.Default.IntroOutroDirectory;
+
+
+            WaveFileReader intro = new WaveFileReader(IntroFileName);
+            WaveFileReader outro = new WaveFileReader(OutroFileName);
+            WaveFileReader audio = new WaveFileReader(SermonFileName);
 
             WaveMixerStream32 mixer = new WaveMixerStream32();
             //mixer.AutoStop;
 
             WaveOffsetStream audioOffsetted = new WaveOffsetStream(
                 audio,
-                TimeSpan.FromSeconds(Settings.Default.SermonStartTime), //22.5 seconds after start of intro.
-                TimeSpan.Zero, 
+                TimeSpan.FromSeconds(StartSermonTime), //N seconds after start of intro.
+                TimeSpan.Zero,
                 audio.TotalTime);
 
-            TimeSpan outroOffset = TimeSpan.FromSeconds(Settings.Default.SermonStartTime) + audio.TotalTime +
-               TimeSpan.FromSeconds(Settings.Default.OutroStartTime) - outro.TotalTime;
-
+            TimeSpan outroOffset = TimeSpan.FromSeconds(StartSermonTime) + audio.TotalTime - TimeSpan.FromSeconds(StartOutroTime);
+            
             WaveOffsetStream outroOffsetted = new WaveOffsetStream(
-               outro, 
-               outroOffset, 
-               TimeSpan.Zero, 
+               outro,
+               outroOffset,
+               TimeSpan.Zero,
                outro.TotalTime);
 
             WaveChannel32 intro32 = new WaveChannel32(intro);
@@ -123,13 +145,75 @@ namespace SoundTouchExample
             audio32.PadWithZeroes = false;
             mixer.AddInputStream(audio32);
 
-            //string FileOut = OriginalAudioFileName.Replace(@".\Trimmed\", @".\IntroOutroAdded\");
-            string FileOut = OriginalAudioFileName.Replace(Settings.Default.TrimmedDirectory, Settings.Default.IntroOutroDirectory);
 
+            FileInfo file = new FileInfo(SermonFileName);
+            if (!Directory.Exists(ResultingFile)) Directory.CreateDirectory(ResultingFile);
+
+            string FileOut = String.Format(@"{0}\{1}", ResultingFile, file.Name);
 
             WaveFileWriter.CreateWaveFile(FileOut, new Wave32To16Stream(mixer));
 
         }
+
+
+        //private static void AddIntroOutro(string SermonFileName = "",
+        //    string IntroFileName = "",
+        //    string OutroFileName = "",
+        //    double StartSermonTime = 0,
+        //    double StartOutroTime = 0,
+        //    string ResultingFile = "")
+        //{
+        //    if (!String.IsNullOrWhiteSpace(SermonFileName)) throw new ArgumentException("SermonFileName must reference a valid file.");
+
+        //    if (!String.IsNullOrWhiteSpace(IntroFileName)) throw new ArgumentException("IntroFileName must reference a valid file.");
+            
+        //    if (!String.IsNullOrWhiteSpace(OutroFileName)) throw new ArgumentException("OutroFileName must reference a valid file.");
+            
+        //    if (!String.IsNullOrWhiteSpace(ResultingFile)) ResultingFile = Settings.Default.IntroOutroDirectory;
+
+        //    WaveFileReader intro = new WaveFileReader(IntroFileName);
+        //    WaveFileReader outro = new WaveFileReader(OutroFileName);
+        //    WaveFileReader audio = new WaveFileReader(SermonFileName);
+
+        //    WaveMixerStream32 mixer = new WaveMixerStream32();
+        //    //mixer.AutoStop;
+
+        //    WaveOffsetStream audioOffsetted = new WaveOffsetStream(
+        //        audio,
+        //        TimeSpan.FromSeconds(StartSermonTime), //22.5 seconds after start of intro.
+        //        TimeSpan.Zero, 
+        //        audio.TotalTime);
+
+        //    TimeSpan outroOffset = TimeSpan.FromSeconds(StartSermonTime) + audio.TotalTime +
+        //       TimeSpan.FromSeconds(StartOutroTime) - outro.TotalTime;
+
+        //    WaveOffsetStream outroOffsetted = new WaveOffsetStream(
+        //       outro, 
+        //       outroOffset, 
+        //       TimeSpan.Zero, 
+        //       outro.TotalTime);
+
+        //    WaveChannel32 intro32 = new WaveChannel32(intro);
+        //    intro32.PadWithZeroes = false;
+        //    mixer.AddInputStream(intro32);
+
+        //    WaveChannel32 outro32 = new WaveChannel32(outroOffsetted);
+        //    outro32.PadWithZeroes = false;
+        //    mixer.AddInputStream(outro32);
+
+        //    WaveChannel32 audio32 = new WaveChannel32(audioOffsetted);
+        //    audio32.PadWithZeroes = false;
+        //    mixer.AddInputStream(audio32);
+
+        //    //string FileOut = OriginalAudioFileName.Replace(@".\Trimmed\", @".\IntroOutroAdded\");
+        //    FileInfo file = new FileInfo(SermonFileName);
+        //    if (!Directory.Exists(ResultingFile)) Directory.CreateDirectory(ResultingFile);
+            
+        //    // Currently ResultingFile should point to a folder where the resulting file will be created
+        //    string FileOut = String.Format(@"{0}\{1}", ResultingFile, file.Name);
+           
+        //    WaveFileWriter.CreateWaveFile(FileOut, new Wave32To16Stream(mixer));
+        //}
 
         private static float CalculateTempo(TimeSpan CurrentDuration, TimeSpan TargetDuration)
         {

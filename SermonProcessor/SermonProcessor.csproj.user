@@ -9,6 +9,9 @@
     <ErrorReportUrlHistory />
     <FallbackCulture>en-US</FallbackCulture>
     <VerifyUploadedFiles>false</VerifyUploadedFiles>
-    <ProjectView>ProjectFiles</ProjectView>
+    <ProjectView>ShowAllFiles</ProjectView>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <StartArguments>AddIntroOutro "C:\Users\jkelly\Documents\Church\Radio Ministry\Original\Exported WAV\Step 2 - Trimmed\20130324 - Considering the Final Hour of Our Lord-01.wav"  "C:\Users\jkelly\Documents\Church\Radio Ministry\Original\Exported WAV\Media\Intro 2015.wav" "C:\Users\jkelly\Documents\Church\Radio Ministry\Original\Exported WAV\Media\Outro 2015.wav" 31 22 "C:\Users\jkelly\Documents\Church\Radio Ministry\Original\Exported WAV\Step 3 - IntroOutroAdded"</StartArguments>
   </PropertyGroup>
 </Project>

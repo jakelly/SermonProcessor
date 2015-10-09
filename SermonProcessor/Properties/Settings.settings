@@ -24,7 +24,7 @@
       <Value Profile="(Default)">.\Media\soxeffects.bat</Value>
     </Setting>
     <Setting Name="SermonStartTime" Type="System.Single" Scope="Application">
-      <Value Profile="(Default)">22</Value>
+      <Value Profile="(Default)">38</Value>
     </Setting>
     <Setting Name="OutroStartTime" Type="System.Single" Scope="Application">
       <Value Profile="(Default)">38</Value>
